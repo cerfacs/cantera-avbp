@@ -10,19 +10,19 @@ on:
         description: "Try to upload wheels and sdist to PyPI after building"
         required: false
         default: "false"
-  push:
-    # Run on tags that look like releases
-    tags:
-      - v*
-    # Run when main is pushed to
-    branches:
-      - main
-  pull_request:
-    # Run on pull requests when this file is modified
-    branches:
-      - main
-    paths:
-      - .github/workflows/packaging.yml
+  # push:
+  #   # Run on tags that look like releases
+  #   tags:
+  #     - v*
+  #   # Run when main is pushed to
+  #   branches:
+  #     - main
+  # pull_request:
+  #   # Run on pull requests when this file is modified
+  #   branches:
+  #     - main
+  #   paths:
+  #     - .github/workflows/packaging.yml
 
 permissions: {}
 

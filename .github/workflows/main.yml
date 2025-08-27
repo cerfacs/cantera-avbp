@@ -1,22 +1,23 @@
 name: CI
 
 on:
-  push:
-    # Build on tags that look like releases
-    tags:
-      - v*
-    # Build when main, testing, or the maintenance branch is pushed to
-    branches:
-      - main
-      - testing
-      # This workflow does not publish artifacts, so we can ignore the cache
-      # poisoning finding.
-      - "3.1" # zizmor: ignore[cache-poisoning]
-  pull_request:
-    # Build when a pull request targets main or the maintenance branch
-    branches:
-      - main
-      - "3.1"
+  workflow_dispatch:
+  # push:
+  #   # Build on tags that look like releases
+  #   tags:
+  #     - v*
+  #   # Build when main, testing, or the maintenance branch is pushed to
+  #   branches:
+  #     - main
+  #     - testing
+  #     # This workflow does not publish artifacts, so we can ignore the cache
+  #     # poisoning finding.
+  #     - "3.1" # zizmor: ignore[cache-poisoning]
+  # pull_request:
+  #   # Build when a pull request targets main or the maintenance branch
+  #   branches:
+  #     - main
+  #     - "3.1"
 
 permissions:
   contents: read
