@@ -342,10 +342,10 @@ void Flow1D::calcMixFrac(const double* x, size_t j) {
 
 void Flow1D::_finalize(const double* x)
 {
-    if (!m_do_multicomponent && m_do_soret) {
+    if (m_do_soret && !(m_do_multicomponent || m_trans->transportModel() == "mixture-averaged")) {
         throw CanteraError("Flow1D::_finalize",
             "Thermal diffusion (the Soret effect) is enabled, and requires "
-            "using a multicomponent transport model.");
+            "using a multicomponent or mixture-averaged transport model.");
     }
 
     size_t nz = m_zfix.size();
