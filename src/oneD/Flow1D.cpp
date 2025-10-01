@@ -48,7 +48,8 @@ Flow1D::Flow1D(ThermoPhase* ph, size_t nsp, size_t nsoot, size_t neq, size_t poi
 
     // Turn off the energy equation at all points
     m_do_energy.resize(m_points,false);
-
+    
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     m_diff.resize(m_nsp*m_points);
     m_multidiff.resize(m_nsp*m_nsp*m_points);
     m_flux.resize(m_nsp,m_points);
@@ -173,6 +174,7 @@ void Flow1D::setTransport(shared_ptr<Transport> trans)
         m_trans->transportModel() == "multicomponent-CK");
 
     m_diff.resize(m_nsp * m_points);
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     if (m_do_multicomponent) {
         m_multidiff.resize(m_nsp * m_nsp*m_points);
         m_dthermal.resize(m_nsp, m_points, 0.0);
@@ -192,6 +194,7 @@ void Flow1D::resize(size_t ncomponents, size_t points)
     m_tcon.resize(m_points, 0.0);
     avbp_thick.resize(m_points,0.0);
 
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     m_diff.resize(m_nsp*m_points);
     if (m_do_multicomponent) {
         m_multidiff.resize(m_nsp*m_nsp*m_points);
@@ -506,6 +509,9 @@ void Flow1D::updateTransport(double* x, size_t j0, size_t j1)
                     m_diff[k+j*m_nsp] *= rho;
                 }
             }
+            if (m_do_soret) {
+                m_trans->getThermalDiffCoeffs(&m_dthermal_mix[j*m_nsp]);
+            }
             m_tcon[j] = m_trans->thermalConductivity();
         }
     }
@@ -552,13 +558,21 @@ void Flow1D::updateDiffFluxes(const double* x, size_t j0, size_t j1)
             for (size_t k = 0; k < m_nsp; k++) {
                 m_flux(k,j) += sum*Y(x,k,j);
             }
-        }
-        if (m_do_soret) {
-            warn_user(" Mixture-averaged and Soret soon to be ",id());
+        
+            if (m_do_soret) {
+                double sum_DiT = 0.0;
+                double gradlogT = 2.0 * (T(x,j+1) - T(x,j)) / ((T(x,j+1) + T(x,j)) * (z(j+1) - z(j)));
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,j) -= m_dthermal_mix[k+m_nsp*j] * gradlogT;
+                    sum_DiT += m_dthermal_mix[k+m_nsp*j];
+                }
+                double u_correc_soret = gradlogT * sum_DiT;
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,j) += u_correc_soret * Y(x,k,j);
+                }
+            }
         }
     }
-
-
 }
 
 void Flow1D::computeRadiation(double* x, size_t jmin, size_t jmax)

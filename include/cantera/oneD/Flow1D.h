@@ -1450,6 +1450,7 @@ protected:
     vector<double> m_ybar; // CERFACS : Added to the public part to be accessible for Flamelet computations 
     vector<double> m_visc; //!< Dynamic viscosity at each grid point [Pa∙s]
     vector<double> m_tcon; //!< Thermal conductivity at each grid point [W/m/K]
+    vector<double> m_dthermal_mix; //!< Mixture-averaged thermal diffusion (soret) coefficient at each grid point
 
     //! Coefficient used in diffusion calculations for each species at each grid point.
     //!
