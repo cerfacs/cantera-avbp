@@ -524,6 +524,15 @@ void Flow1D::updateDiffFluxes(const double* x, size_t j0, size_t j1)
                 m_flux(k,j) = sum * m_diff[k+j*m_nsp] / dz;
             }
         }
+        if (m_do_soret) {
+            for (size_t m = j0; m < j1; m++) {
+                double gradlogT = 2.0 * (T(x,m+1) - T(x,m)) /
+                                ((T(x,m+1) + T(x,m)) * (z(m+1) - z(m)));
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,m) -= m_dthermal(k,m)*gradlogT;
+                }
+            }
+        }
     } else {
         for (size_t j = j0; j < j1; j++) {
             double sum = 0.0;
@@ -544,17 +553,12 @@ void Flow1D::updateDiffFluxes(const double* x, size_t j0, size_t j1)
                 m_flux(k,j) += sum*Y(x,k,j);
             }
         }
-    }
-
-    if (m_do_soret) {
-        for (size_t m = j0; m < j1; m++) {
-            double gradlogT = 2.0 * (T(x,m+1) - T(x,m)) /
-                              ((T(x,m+1) + T(x,m)) * (z(m+1) - z(m)));
-            for (size_t k = 0; k < m_nsp; k++) {
-                m_flux(k,m) -= m_dthermal(k,m)*gradlogT;
-            }
+        if (m_do_soret) {
+            warn_user(" Mixture-averaged and Soret soon to be ",id());
         }
     }
+
+
 }
 
 void Flow1D::computeRadiation(double* x, size_t jmin, size_t jmax)
