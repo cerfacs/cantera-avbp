@@ -50,8 +50,47 @@ double MixTransport::thermalConductivity()
 
 void MixTransport::getThermalDiffCoeffs(double* const dt)
 {
-    for (size_t k = 0; k < m_nsp; k++) {
-        dt[k] = 0.0;
+    update_T();
+    update_C();
+    updateThermalRatio_T();
+    // Hard coded correction factor for H and H2 -- to be updated
+    double alpha_correction_H2 = 0.664;
+    double alpha_correction_H = 0.580;
+    vector<double> theta_i_j(m_nsp, 0.0);
+    m_thermo->getMoleFractions(m_molefracs.data());
+
+    for (size_t i = 0; i < m_nsp; i++) {
+        dt[i] = 0.0f;
+        if ((m_thermo->speciesName(i) == "H")) {
+            for (size_t j = 0; j < m_nsp; j++) {
+                if (i != j) {
+                    theta_i_j[i] = m_bdiff_thermal(i,j)* m_molefracs[i]*m_molefracs[j];
+                    if (m_thermo->molecularWeights()[i] > m_thermo->molecularWeights()[j])
+                        dt[i] += abs(theta_i_j[i]);
+                    else
+                        dt[i] -= abs(theta_i_j[i]);
+                    }
+            }
+            dt[i] *= alpha_correction_H;
+        }
+        else if ((m_thermo->speciesName(i) == "H2")) {
+            for (size_t j = 0; j < m_nsp; j++) {
+                if (i != j) {
+                    theta_i_j[i] = m_bdiff_thermal(i,j)* m_molefracs[i]*m_molefracs[j];
+                    if (m_thermo->molecularWeights()[i] > m_thermo->molecularWeights()[j])
+                        dt[i] += abs(theta_i_j[i]);
+                    else
+                        dt[i] -= abs(theta_i_j[i]);
+                    }
+            }
+            dt[i] *= alpha_correction_H2;
+        }
+
+        double rho = m_thermo->density();
+        getMixDiffCoeffsMass(m_spwork.data());
+        double Dk = m_spwork[i];
+        double wk_over_w = m_thermo->molecularWeights()[i] / m_thermo->meanMolecularWeight();
+        dt[i] = dt[i] * rho * wk_over_w * Dk;
     }
 }
 

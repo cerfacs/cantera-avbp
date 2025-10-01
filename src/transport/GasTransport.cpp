@@ -146,12 +146,42 @@ void GasTransport::updateDiff_T()
     m_bindiff_ok = true;
 }
 
+void GasTransport::updateThermalRatio_T()
+{
+    update_T();
+    update_C();
+    size_t ic = 0;
+    if (m_mode == CK_Mode) {
+        for (size_t i = 0; i < m_nsp; i++) {
+            for (size_t j = i; j < m_nsp; j++) {
+                std::cout << "in ck_mode" << std::endl;
+                m_bdiff_thermal(i,j) = exp(dot4(m_polytempvec, m_thetacoefs[ic]));
+                m_bdiff_thermal(j,i) = m_bdiff_thermal(i,j);
+                ic++;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < m_nsp; i++) {
+            for (size_t j = i; j < m_nsp; j++) {
+                
+                m_bdiff_thermal(i,j) = dot5(m_polytempvec,
+                                                      m_thetacoefs[ic]);
+                
+                m_bdiff_thermal(j,i) = m_bdiff_thermal(i,j);
+
+                ic++;
+            }
+        }
+    }
+}
+
 void GasTransport::getBinaryDiffCoeffs(const size_t ld, double* const d)
 {
     update_T();
     // if necessary, evaluate the binary diffusion coefficients from the polynomial fits
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
     if (ld < m_nsp) {
         throw CanteraError("GasTransport::getBinaryDiffCoeffs", "ld is too small");
@@ -172,6 +202,7 @@ void GasTransport::getMixDiffCoeffs(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double mmw = m_thermo->meanMolecularWeight();
@@ -203,6 +234,7 @@ void GasTransport::getMixDiffCoeffsMole(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double p = m_thermo->pressure();
@@ -233,6 +265,7 @@ void GasTransport::getMixDiffCoeffsMass(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double mmw = m_thermo->meanMolecularWeight();

@@ -393,6 +393,9 @@ protected:
     //! for each species
     vector<vector<double>> m_thetacoefs;
 
+    
+    virtual void updateThermalRatio_T();
+    
     //! Matrix of binary diffusion coefficients at the reference pressure and
     //! the current temperature Size is nsp x nsp.
     DenseMatrix m_bdiff;
