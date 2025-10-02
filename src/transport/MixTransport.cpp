@@ -67,9 +67,9 @@ void MixTransport::getThermalDiffCoeffs(double* const dt)
                 if (i != j) {
                     theta_i_j[i] = m_bdiff_thermal(i,j)* m_molefracs[i]*m_molefracs[j];
                     if (m_thermo->molecularWeights()[i] > m_thermo->molecularWeights()[j])
-                        dt[i] = dt[i] + (double)fabs((double)theta_i_j[i]);
+                        dt[i] = dt[i] + fabs(theta_i_j[i]);
                     else
-                        dt[i] = dt[i] - (double)fabs((double)theta_i_j[i]);
+                        dt[i] = dt[i] - fabs(theta_i_j[i]);
                     }
             }
             dt[i] = dt[i] * alpha_correction_H;
