@@ -1134,6 +1134,24 @@ cdef class FlowBase(Domain1D):
         def __get__(self):
             return self.flow.getThick()
 
+    property alphaH2:
+        """
+        AlphaH2 for simplified soret effect of mixture-ave [CE]
+        """
+        def __set__(self, alphaH2):
+            self.flow.setAlphaH2(alphaH2)
+        def __get__(self):
+            return self.flow.getAlphaH2()
+
+    property alphaH:
+        """
+        AlphaH for simplified soret effect of mixture-ave [CE]
+        """
+        def __set__(self, alphaH):
+            self.flow.setAlphaH(alphaH)
+        def __get__(self):
+            return self.flow.getAlphaH()
+
     def set_free_flow(self):
         """
         Set flow configuration for freely-propagating flames, using an internal

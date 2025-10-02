@@ -69,6 +69,7 @@ public:
      */
     void getThermalDiffCoeffs(double* const dt) override;
 
+    void getThermalDiffCoeffsSoretMix(double* const dt, double const alpha_H2, double const alpha_H) override;
     //! Returns the mixture thermal conductivity (W/m /K)
     /*!
      * The thermal conductivity is computed from the following mixture rule:

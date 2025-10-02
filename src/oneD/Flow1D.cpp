@@ -510,7 +510,7 @@ void Flow1D::updateTransport(double* x, size_t j0, size_t j1)
                 }
             }
             if (m_do_soret) {
-                m_trans->getThermalDiffCoeffs(&m_dthermal_mix[j*m_nsp]);
+                m_trans->getThermalDiffCoeffsSoretMix(&m_dthermal_mix[j*m_nsp], simplified_soret_mixture_averaged_alpha_corr_H2, simplified_soret_mixture_averaged_alpha_corr_H);
             }
             m_tcon[j] = m_trans->thermalConductivity();
         }

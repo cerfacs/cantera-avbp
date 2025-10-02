@@ -50,13 +50,20 @@ double MixTransport::thermalConductivity()
 
 void MixTransport::getThermalDiffCoeffs(double* const dt)
 {
+    for (size_t k = 0; k < m_nsp; k++) {
+        dt[k] = 0.0;
+    }
+}
+
+void MixTransport::getThermalDiffCoeffsSoretMix(double* const dt, double const alpha_H2, double const alpha_H )
+{
     update_T();
     update_C();
     
 
     // Hard coded correction factor for H and H2 -- to be updated
-    double alpha_correction_H2 = 0.664f;
-    double alpha_correction_H = 0.580f;
+    double alpha_correction_H2 = alpha_H2;
+    double alpha_correction_H = alpha_H;
     vector<double> theta_i_j(m_nsp, 0.0f);
     m_thermo->getMoleFractions(m_molefracs.data());
     updateThermalRatio_T();

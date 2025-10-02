@@ -658,6 +658,22 @@ public:
       return m_thick;
     }
 
+    void setAlphaH2(double alphaH2){
+      simplified_soret_mixture_averaged_alpha_corr_H2 = alphaH2;
+    }
+
+    double getAlphaH2() const {
+      return simplified_soret_mixture_averaged_alpha_corr_H2;
+    }
+
+    void setAlphaH(double alphaH){
+      simplified_soret_mixture_averaged_alpha_corr_H = alphaH;
+    }
+
+    double getAlphaH() const {
+      return simplified_soret_mixture_averaged_alpha_corr_H;
+    }
+
     //! Specify that the the temperature should be held fixed at point `j`.
     //! The converse of this method is enableEnergyEqn().
     //! @param j  Point at which to specify a fixed temperature. `npos` means all
@@ -1520,6 +1536,9 @@ protected:
     double avbp_fthick;
     vector<double> avbp_thick;
     double m_thick = 1.0;
+
+    double simplified_soret_mixture_averaged_alpha_corr_H2 = 0.0;
+    double simplified_soret_mixture_averaged_alpha_corr_H = 0.0;
 
     //! @name flags
     //! @{
