@@ -2,7 +2,7 @@ import cantera as ct
 import numpy as np
 
 
-gas = ct.Solution('./inputs/SanDiego_hydrogen.yaml')
+gas = ct.Solution('./inputs/SanDiego_H2.yaml')
 gas.TP = 300, ct.one_atm
 phi = 0.6
 gas.set_equivalence_ratio(phi, 'H2', 'O2:1, N2:3.76')
