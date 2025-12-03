@@ -181,7 +181,6 @@ void GasTransport::getBinaryDiffCoeffs(const size_t ld, double* const d)
     // if necessary, evaluate the binary diffusion coefficients from the polynomial fits
     if (!m_bindiff_ok) {
         updateDiff_T();
-        updateThermalRatio_T();
     }
     if (ld < m_nsp) {
         throw CanteraError("GasTransport::getBinaryDiffCoeffs", "ld is too small");
