@@ -55,6 +55,8 @@ __sundials_version__ = pystr(get_sundials_version())
 
 __version__ = pystr(CxxVersion())
 
+__cantera_avbp_version__ = pystr(CxxAvbpVersion())
+
 if __version__ != pystr(get_cantera_version_py()):
     raise ImportError("Mismatch between Cantera Python module version "
         f"({pystr(get_cantera_version_py())}) and Cantera shared library "
