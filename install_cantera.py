@@ -104,6 +104,9 @@ if argument == 'local':
         subprocess.call('pip3 install scons', shell=True)
         subprocess.call('pip3 install wheel', shell=True)
         subprocess.call('pip3 install ruamel.yaml', shell=True)
+        subprocess.call('pip3 install pytest', shell=True)
+        subprocess.call('pip3 install matplotlib', shell=True)
+        subprocess.call('pip3 install scipy', shell=True)
     elif update_argument in ['no', 'n']:
         pass
     else:
@@ -124,6 +127,9 @@ else:
         subprocess.call('pip3 install scons', shell=True)
         subprocess.call('pip3 install wheel', shell=True)
         subprocess.call('pip3 install ruamel.yaml', shell=True)
+        subprocess.call('pip3 install pytest', shell=True)
+        subprocess.call('pip3 install matplotlib', shell=True)
+        subprocess.call('pip3 install scipy', shell=True)
     elif update_argument in ['no', 'n']:
         pass
     else:

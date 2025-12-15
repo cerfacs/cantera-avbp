@@ -147,6 +147,11 @@ string version()
     return CANTERA_VERSION;
 }
 
+string avbpVersion()
+{
+    return CANTERA_AVBP_VERSION;
+}
+
 string gitCommit()
 {
 #ifdef GIT_COMMIT

@@ -116,6 +116,9 @@ bool usingSharedLibrary();
 //! @since New in %Cantera 3.0
 string version();
 
+//! Returns true if cantera-avbp version. 
+string avbpVersion();
+
 //! Returns the hash of the git commit from which %Cantera was compiled, if known
 string gitCommit();
 

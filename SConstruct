@@ -164,6 +164,7 @@ logger.info(
     f"    {sys.executable} (Python {python_version})", print_level=False)
 
 cantera_version = "3.1.0"
+cantera_avbp_version = "1.0.0"
 # For use where pre-release tags are not permitted (MSI, sonames)
 cantera_pure_version = re.match(r'(\d+\.\d+\.\d+)', cantera_version).group(0)
 cantera_short_version = re.match(r'(\d+\.\d+)', cantera_version).group(0)
@@ -877,6 +878,7 @@ env = Environment(tools=toolchain+["textfile", "subst", "recursiveInstall", "Uni
 env["cantera_version"] = cantera_version
 env["cantera_pure_version"] = cantera_pure_version
 env["cantera_short_version"] = cantera_short_version
+env["cantera_avbp_version"] = cantera_avbp_version
 env["git_commit"] = cantera_git_commit
 
 env["OS"] = platform.system()
@@ -1833,6 +1835,7 @@ configh = {}
 
 configh['CANTERA_VERSION'] = quoted(env['cantera_version'])
 configh['CANTERA_SHORT_VERSION'] = quoted(env['cantera_short_version'])
+configh['CANTERA_AVBP_VERSION'] = quoted(env['cantera_avbp_version'])
 
 # Conditional defines
 def cdefine(definevar, configvar, comp=True, value=1):

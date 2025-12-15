@@ -5,6 +5,9 @@
 // Cantera version -> this will be a double-quoted string value
 {CANTERA_VERSION!s}
 
+// Flag for avbp-cantera version 
+{CANTERA_AVBP_VERSION!s}
+
 // Just the major + minor version (that is, 2.2 instead of 2.2.0)
 {CANTERA_SHORT_VERSION!s}
 

@@ -32,6 +32,12 @@ inline std::string get_cantera_version_py()
     return CANTERA_VERSION;
 }
 
+// Cantera-avbp version for Python module compilation
+inline std::string get_cantera_avbp_version_py()
+{
+    return CANTERA_AVBP_VERSION;
+}
+
 // Git commit for Python module compilation
 inline std::string get_cantera_git_commit_py()
 {

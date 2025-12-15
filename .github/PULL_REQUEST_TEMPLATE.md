@@ -1,3 +1,6 @@
+### !!! IMPORTANT WARNING !!! 
+**Check the base branch (branch where merge will be applied) is `dev_cantera-avbp` and not `main.`**
+
 <!-- Thanks for contributing code! Please include a description of your change and check your pull request against the list below. For further questions, refer to the contributing guide (https://github.com/Cantera/cantera/blob/main/CONTRIBUTING.md). -->
 
 **Changes proposed in this pull request**
@@ -21,7 +24,10 @@ Closes #
 **Checklist**
 
 - [ ] The pull request includes a clear description of this code change
-- [ ] Commit messages have short titles and reference relevant issues
-- [ ] Build passes (`scons build` & `scons test`) and unit tests address code coverage
+- [ ] Build passes (`scons build` & `scons test`) 
+- [ ] If applicable, unit tests and samples address code coverage of the new features
 - [ ] Style & formatting of contributed code follows [contributing guidelines](https://github.com/Cantera/cantera/blob/main/CONTRIBUTING.md)
 - [ ] The pull request is ready for review
+
+
+<!-- For further questions related to cantera-avbp, please contact pestre@cerfacs.fr -->
