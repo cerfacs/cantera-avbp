@@ -37,11 +37,12 @@ def _substitute_lines(lines: list[str], substitutions: dict[str, str]) -> list[s
 
 
 def do_configure_substitution(
-    configure_source: Path, cantera_version: str, cantera_short_version: str
+    configure_source: Path, cantera_version: str, cantera_short_version: str, cantera_avbp_version: str
 ) -> str:
     configure_template = configure_source.read_text()
     configure_subst = {
         "CANTERA_VERSION": f'#define CANTERA_VERSION "{cantera_version}"',
+        "CANTERA_AVBP_VERSION": f'#define CANTERA__AVBP_VERSION "{cantera_avbp_version}"',
         "CANTERA_SHORT_VERSION": f'#define CANTERA_SHORT_VERSION "{cantera_short_version}"',
         "FTN_TRAILING_UNDERSCORE": "#define FTN_TRAILING_UNDERSCORE 1",
         "LAPACK_FTN_STRING_LEN_AT_END": "#define LAPACK_FTN_STRING_LEN_AT_END 1",
@@ -91,6 +92,7 @@ def main(
     py_requires_ver_str: str,
     cantera_version: str,
     cantera_short_version: str,
+    cantera_avbp_version: str,
 ):
     src_source = source_directory / "src"
     src_target = target_directory / "src"
@@ -178,7 +180,7 @@ def main(
     configure_target = target_directory / config_h_in
     configure_target.write_text(
         do_configure_substitution(
-            configure_source, cantera_version, cantera_short_version
+            configure_source, cantera_version, cantera_short_version, cantera_avbp_version
         )
     )
 
@@ -197,6 +199,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("python_version_req")
     parser.add_argument("cantera_version")
     parser.add_argument("cantera_short_version")
+    parser.add_argument("cantera_avbp_version")
     args = parser.parse_args(argv)
     return args
 
@@ -210,4 +213,5 @@ if __name__ == "__main__":
         args.python_version_req,
         args.cantera_version,
         args.cantera_short_version,
+        args.cantera_avbp_version,
     )
