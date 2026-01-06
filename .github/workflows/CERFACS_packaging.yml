@@ -337,7 +337,7 @@ jobs:
       #     key: ${{ steps.restore-built-libraries.outputs.cache-primary-key }}
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # 3.1.4
+        uses: pypa/cibuildwheel@63fd63b352a9a8bdcc24791c9dbee952ee9a8abc # 3.3.0
         env:
           CC: clang
           CXX: clang++
@@ -392,7 +392,7 @@ jobs:
         shell: bash
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # 3.1.4
+        uses: pypa/cibuildwheel@63fd63b352a9a8bdcc24791c9dbee952ee9a8abc # 3.3.0
         env:
           CIBW_ENVIRONMENT_LINUX: CT_SKIP_SLOW=1 CANTERA_TEST_DIR=/host${{ steps.download-test-files.outputs.test-root }}
           CIBW_BEFORE_BUILD: |
