@@ -42,7 +42,7 @@ def do_configure_substitution(
     configure_template = configure_source.read_text()
     configure_subst = {
         "CANTERA_VERSION": f'#define CANTERA_VERSION "{cantera_version}"',
-        "CANTERA_AVBP_VERSION": f'#define CANTERA__AVBP_VERSION "{cantera_avbp_version}"',
+        "CANTERA_AVBP_VERSION": f'#define CANTERA_AVBP_VERSION "{cantera_avbp_version}"',
         "CANTERA_SHORT_VERSION": f'#define CANTERA_SHORT_VERSION "{cantera_short_version}"',
         "FTN_TRAILING_UNDERSCORE": "#define FTN_TRAILING_UNDERSCORE 1",
         "LAPACK_FTN_STRING_LEN_AT_END": "#define LAPACK_FTN_STRING_LEN_AT_END 1",
