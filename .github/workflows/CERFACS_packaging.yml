@@ -261,7 +261,7 @@ jobs:
             boost-arch: aarch64
             boost-toolset: clang
             boost-platform-version: "14"
-            boost-version: "1.86.0"
+            boost-version: "1.88.0"
             arch: "arm64"
       fail-fast: true # Si plusieurs configs dans la matrice et fail-fast = False permet de continuer le workflow pour les autre config.
 
@@ -288,7 +288,7 @@ jobs:
         shell: bash
 
       - name: Install boost
-        uses: MarkusJx/install-boost@b1f0ee8b87cf60236b72440c72d0085d002770c5 # v2.5.0
+        uses: MarkusJx/install-boost@8ba8b2fac59ef3d91a838bb4aa53ceabd33d1aa3 # v2.5.1
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
