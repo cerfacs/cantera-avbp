@@ -287,6 +287,10 @@ jobs:
           echo "test-root=${RUNNER_TEMP}/ct-test-dir" >> $GITHUB_OUTPUT
         shell: bash
 
+      - name: Install uv
+        if: runner.os != 'Linux'
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
+
       - name: Install boost
         uses: MarkusJx/install-boost@8ba8b2fac59ef3d91a838bb4aa53ceabd33d1aa3 # v2.5.1
         id: install-boost
