@@ -49,7 +49,8 @@ Flow1D::Flow1D(ThermoPhase* ph, size_t nsp, size_t nsoot, size_t nfic, size_t ne
 
     // Turn off the energy equation at all points
     m_do_energy.resize(m_points,false);
-
+    
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     m_diff.resize(m_nsp*m_points);
     m_multidiff.resize(m_nsp*m_nsp*m_points);
     m_flux.resize(m_nsp,m_points);
@@ -185,6 +186,7 @@ void Flow1D::setTransport(shared_ptr<Transport> trans)
         m_trans->transportModel() == "multicomponent-CK");
 
     m_diff.resize(m_nsp * m_points);
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     if (m_do_multicomponent) {
         m_multidiff.resize(m_nsp * m_nsp*m_points);
         m_dthermal.resize(m_nsp, m_points, 0.0);
@@ -204,6 +206,7 @@ void Flow1D::resize(size_t ncomponents, size_t points)
     m_tcon.resize(m_points, 0.0);
     avbp_thick.resize(m_points,0.0);
 
+    m_dthermal_mix.resize(m_nsp * m_points, 0.0);
     m_diff.resize(m_nsp*m_points);
     if (m_do_multicomponent) {
         m_multidiff.resize(m_nsp*m_nsp*m_points);
@@ -365,10 +368,10 @@ void Flow1D::calcMixFrac(const double* x, size_t j) {
 
 void Flow1D::_finalize(const double* x)
 {
-    if (!m_do_multicomponent && m_do_soret) {
+    if (m_do_soret && !(m_do_multicomponent || m_trans->transportModel() == "mixture-averaged")) {
         throw CanteraError("Flow1D::_finalize",
             "Thermal diffusion (the Soret effect) is enabled, and requires "
-            "using a multicomponent transport model.");
+            "using a multicomponent or mixture-averaged transport model.");
     }
 
     size_t nz = m_zfix.size();
@@ -531,6 +534,9 @@ void Flow1D::updateTransport(double* x, size_t j0, size_t j1)
                     m_diff[k+j*m_nsp] *= rho;
                 }
             }
+            if (m_do_soret) {
+                m_trans->getThermalDiffCoeffsSoretMix(&m_dthermal_mix[j*m_nsp], simplified_soret_mixture_averaged_alpha_corr_H2, simplified_soret_mixture_averaged_alpha_corr_H);
+            }
             m_tcon[j] = m_trans->thermalConductivity();
         }
     }
@@ -547,6 +553,15 @@ void Flow1D::updateDiffFluxes(const double* x, size_t j0, size_t j1)
                     sum += m_wt[m] * m_multidiff[mindex(k,m,j)] * (X(x,m,j+1)-X(x,m,j));
                 }
                 m_flux(k,j) = sum * m_diff[k+j*m_nsp] / dz;
+            }
+        }
+        if (m_do_soret) {
+            for (size_t m = j0; m < j1; m++) {
+                double gradlogT = 2.0 * (T(x,m+1) - T(x,m)) /
+                                ((T(x,m+1) + T(x,m)) * (z(m+1) - z(m)));
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,m) -= m_dthermal(k,m)*gradlogT;
+                }
             }
         }
     } else {
@@ -568,15 +583,18 @@ void Flow1D::updateDiffFluxes(const double* x, size_t j0, size_t j1)
             for (size_t k = 0; k < m_nsp; k++) {
                 m_flux(k,j) += sum*Y(x,k,j);
             }
-        }
-    }
-
-    if (m_do_soret) {
-        for (size_t m = j0; m < j1; m++) {
-            double gradlogT = 2.0 * (T(x,m+1) - T(x,m)) /
-                              ((T(x,m+1) + T(x,m)) * (z(m+1) - z(m)));
-            for (size_t k = 0; k < m_nsp; k++) {
-                m_flux(k,m) -= m_dthermal(k,m)*gradlogT;
+        
+            if (m_do_soret) {
+                double sum_DiT = 0.0;
+                double gradlogT = 2.0 * (T(x,j+1) - T(x,j)) / ((T(x,j+1) + T(x,j)) * (z(j+1) - z(j)));
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,j) -= m_dthermal_mix[k+m_nsp*j] * gradlogT;
+                    sum_DiT += m_dthermal_mix[k+m_nsp*j];
+                }
+                double u_correc_soret = gradlogT * sum_DiT;
+                for (size_t k = 0; k < m_nsp; k++) {
+                    m_flux(k,j) += u_correc_soret * Y(x,k,j);
+                }
             }
         }
     }

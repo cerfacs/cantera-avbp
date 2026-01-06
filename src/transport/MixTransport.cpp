@@ -55,6 +55,53 @@ void MixTransport::getThermalDiffCoeffs(double* const dt)
     }
 }
 
+void MixTransport::getThermalDiffCoeffsSoretMix(double* const dt, double const alpha_H2, double const alpha_H )
+{
+    update_T();
+    update_C();
+    
+
+    // Hard coded correction factor for H and H2 -- to be updated
+    double alpha_correction_H2 = alpha_H2;
+    double alpha_correction_H = alpha_H;
+    vector<double> theta_i_j(m_nsp, 0.0f);
+    m_thermo->getMoleFractions(m_molefracs.data());
+    updateThermalRatio_T();
+    for (size_t i = 0; i < m_nsp; i++) {
+        dt[i] = 0.0f;
+        if ((m_thermo->speciesName(i) == "H")) {
+            for (size_t j = 0; j < m_nsp; j++) {
+                if (i != j) {
+                    theta_i_j[i] = m_bdiff_thermal(i,j)* m_molefracs[i]*m_molefracs[j];
+                    if (m_thermo->molecularWeights()[i] > m_thermo->molecularWeights()[j])
+                        dt[i] = dt[i] + fabs(theta_i_j[i]);
+                    else
+                        dt[i] = dt[i] - fabs(theta_i_j[i]);
+                    }
+            }
+            dt[i] = dt[i] * alpha_correction_H;
+        }
+        else if ((m_thermo->speciesName(i) == "H2")) {
+            for (size_t j = 0; j < m_nsp; j++) {
+                if (i != j) {
+                    theta_i_j[i] = m_bdiff_thermal(i,j)* m_molefracs[i]*m_molefracs[j];
+                    if (m_thermo->molecularWeights()[i] > m_thermo->molecularWeights()[j])
+                        dt[i] = dt[i] + fabs(theta_i_j[i]);
+                    else
+                        dt[i] = dt[i] - fabs(theta_i_j[i]);
+                    }
+            }
+            dt[i] = dt[i] * alpha_correction_H2;
+        }
+
+        double rho = m_thermo->density();
+        getMixDiffCoeffsMass(m_spwork.data());
+        double Dk = m_spwork[i];
+        double wk_over_w = m_thermo->molecularWeights()[i] / m_thermo->meanMolecularWeight();
+        dt[i] = dt[i] * rho * wk_over_w * Dk;
+    }
+}
+
 void MixTransport::getSpeciesFluxes(size_t ndim, const double* const grad_T,
                                     size_t ldx, const double* const grad_X,
                                     size_t ldf, double* const fluxes)

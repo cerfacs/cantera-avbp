@@ -389,9 +389,20 @@ protected:
      */
     vector<vector<double>> m_diffcoeffs;
 
+    //! Polynomial fits to the theta of thermal diffusion 
+    //! for each species
+    vector<vector<double>> m_thetacoefs;
+
+    
+    virtual void updateThermalRatio_T();
+    
     //! Matrix of binary diffusion coefficients at the reference pressure and
     //! the current temperature Size is nsp x nsp.
     DenseMatrix m_bdiff;
+
+    //! Matrix of binary thermal diffusion coefficients at the reference pressure and
+    //! the current temperature Size is nsp x nsp.
+    DenseMatrix m_bdiff_thermal;
 
     //! temperature fits of the heat conduction
     /*!

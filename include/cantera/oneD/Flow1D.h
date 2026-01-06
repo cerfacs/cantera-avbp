@@ -711,6 +711,22 @@ public:
       return m_thick;
     }
 
+    void setAlphaH2(double alphaH2){
+      simplified_soret_mixture_averaged_alpha_corr_H2 = alphaH2;
+    }
+
+    double getAlphaH2() const {
+      return simplified_soret_mixture_averaged_alpha_corr_H2;
+    }
+
+    void setAlphaH(double alphaH){
+      simplified_soret_mixture_averaged_alpha_corr_H = alphaH;
+    }
+
+    double getAlphaH() const {
+      return simplified_soret_mixture_averaged_alpha_corr_H;
+    }
+
     //! Specify that the the temperature should be held fixed at point `j`.
     //! The converse of this method is enableEnergyEqn().
     //! @param j  Point at which to specify a fixed temperature. `npos` means all
@@ -1529,6 +1545,7 @@ protected:
     vector<double> m_ybar; // CERFACS : Added to the public part to be accessible for Flamelet computations 
     vector<double> m_visc; //!< Dynamic viscosity at each grid point [Pa∙s]
     vector<double> m_tcon; //!< Thermal conductivity at each grid point [W/m/K]
+    vector<double> m_dthermal_mix; //!< Mixture-averaged thermal diffusion (soret) coefficient at each grid point
 
     //! Coefficient used in diffusion calculations for each species at each grid point.
     //!
@@ -1600,6 +1617,9 @@ protected:
     double avbp_fthick;
     vector<double> avbp_thick;
     double m_thick = 1.0;
+
+    double simplified_soret_mixture_averaged_alpha_corr_H2 = 0.0;
+    double simplified_soret_mixture_averaged_alpha_corr_H = 0.0;
 
     //! @name flags
     //! @{

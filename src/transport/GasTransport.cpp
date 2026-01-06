@@ -146,6 +146,35 @@ void GasTransport::updateDiff_T()
     m_bindiff_ok = true;
 }
 
+void GasTransport::updateThermalRatio_T()
+{
+    update_T();
+    update_C();
+    size_t ic = 0;
+    if (m_mode == CK_Mode) {
+        for (size_t i = 0; i < m_nsp; i++) {
+            for (size_t j = i; j < m_nsp; j++) {
+                std::cout << "in ck_mode" << std::endl;
+                m_bdiff_thermal(i,j) = exp(dot4(m_polytempvec, m_thetacoefs[ic]));
+                m_bdiff_thermal(j,i) = m_bdiff_thermal(i,j);
+                ic++;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < m_nsp; i++) {
+            for (size_t j = i; j < m_nsp; j++) {
+                
+                m_bdiff_thermal(i,j) = dot5(m_polytempvec,
+                                                      m_thetacoefs[ic]);
+                
+                m_bdiff_thermal(j,i) = m_bdiff_thermal(i,j);
+
+                ic++;
+            }
+        }
+    }
+}
+
 void GasTransport::getBinaryDiffCoeffs(const size_t ld, double* const d)
 {
     update_T();
@@ -172,6 +201,7 @@ void GasTransport::getMixDiffCoeffs(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double mmw = m_thermo->meanMolecularWeight();
@@ -203,6 +233,7 @@ void GasTransport::getMixDiffCoeffsMole(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double p = m_thermo->pressure();
@@ -233,6 +264,7 @@ void GasTransport::getMixDiffCoeffsMass(double* const d)
     // update the binary diffusion coefficients if necessary
     if (!m_bindiff_ok) {
         updateDiff_T();
+        updateThermalRatio_T();
     }
 
     double mmw = m_thermo->meanMolecularWeight();
@@ -281,6 +313,7 @@ void GasTransport::init(ThermoPhase* thermo, int mode, int log_level)
     m_sqvisc.resize(m_nsp);
     m_phi.resize(m_nsp, m_nsp, 0.0);
     m_bdiff.resize(m_nsp, m_nsp);
+    m_bdiff_thermal.resize(m_nsp, m_nsp);
 
     // make a local copy of the molecular weights
     m_mw = m_thermo->molecularWeights();
@@ -701,6 +734,7 @@ void GasTransport::fitDiffCoeffs(MMCollisionInt& integrals)
     double dt = (m_thermo->maxTemp() - m_thermo->minTemp())/(np-1);
     vector<double> tlog(np);
     vector<double> w(np), w2(np);
+    vector<double> w_theta(np);
 
     // generate array of log(t) values
     for (size_t n = 0; n < np; n++) {
@@ -709,11 +743,13 @@ void GasTransport::fitDiffCoeffs(MMCollisionInt& integrals)
     }
 
     // vector of polynomial coefficients
-    vector<double> c(degree + 1), c2(degree + 1);
+    vector<double> c(degree + 1), c2(degree + 1), c_theta(degree + 1);
     double err, relerr, mxerr = 0.0, mxrelerr = 0.0;
 
     vector<double> diff(np + 1);
+    vector<double> theta(np + 1);
     m_diffcoeffs.clear();
+    m_thetacoefs.clear();
     for (size_t k = 0; k < m_nsp; k++) {
         for (size_t j = k; j < m_nsp; j++) {
             for (size_t n = 0; n < np; n++) {
@@ -725,6 +761,14 @@ void GasTransport::fitDiffCoeffs(MMCollisionInt& integrals)
                 double diffcoeff = 3.0/16.0 * sqrt(2.0 * Pi/m_reducedMass(k,j))
                     * pow(Boltzmann * t, 1.5) / (Pi * sigma * sigma * om11);
 
+                // Mixture average simplified soret relatex terms 
+                double astar = integrals.astar(tstar, m_delta(k,j));
+                double bstar = integrals.bstar(tstar, m_delta(k,j));
+                double cstar = integrals.cstar(tstar, m_delta(k,j));
+                double molar_mass_j = m_thermo->molecularWeights()[j];
+                double molar_mass_k = m_thermo->molecularWeights()[k];
+                double theta_kj = 15.0f / 2.0f * (2.0f*astar + 5.0f) * (6.0f*cstar - 5.0f) / (astar * (16.0f*astar - 12.0f*bstar + 55.0f)) * (molar_mass_j-molar_mass_k) / (molar_mass_k+molar_mass_j);
+
                 // 2nd order correction
                 // NOTE: THIS CORRECTION IS NOT APPLIED
                 double fkj, fjk;
@@ -732,10 +776,18 @@ void GasTransport::fitDiffCoeffs(MMCollisionInt& integrals)
 
                 if (m_mode == CK_Mode) {
                     diff[n] = log(diffcoeff);
+                    theta[n] = log(theta_kj);
                     w[n] = -1.0;
                 } else {
                     diff[n] = diffcoeff/pow(t, 1.5);
+                    theta[n] = theta_kj;
                     w[n] = 1.0/(diff[n]*diff[n]);
+                    if (j==k){
+                        w_theta[n] = 1.0;
+                    }
+                    else{
+                        w_theta[n] = 1.0/(theta[n]*theta[n]);
+                    }
                 }
             }
             polyfit(np, degree, tlog.data(), diff.data(), w.data(), c.data());
@@ -761,6 +813,10 @@ void GasTransport::fitDiffCoeffs(MMCollisionInt& integrals)
                 writelog(m_thermo->speciesName(k) + "__" +
                          m_thermo->speciesName(j) + ": [" + vec2str(c) + "]\n");
             }
+
+            polyfit(np, degree, tlog.data(), theta.data(), w_theta.data(), c_theta.data());
+            m_thetacoefs.push_back(c_theta);
+
         }
     }
 

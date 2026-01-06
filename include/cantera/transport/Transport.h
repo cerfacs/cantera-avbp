@@ -272,7 +272,11 @@ public:
         throw NotImplementedError("Transport::getThermalDiffCoeffs",
             "Not implemented for transport model '{}'.", transportModel());
     }
-
+    
+    virtual void getThermalDiffCoeffsSoretMix(double* const dt, double const alpha_H2, double const alpha_H) {
+        throw NotImplementedError("Transport::getThermalDiffCoeffs",
+            "Not implemented for transport model '{}'.", transportModel());
+    }
     //! Returns the matrix of binary diffusion coefficients [m^2/s].
     /*!
      * @param[in] ld   Inner stride for writing the two dimension diffusion
