@@ -537,6 +537,8 @@ class TestFreeFlame:
         # but they should be close
         assert sl_mole == approx(sl_mass, rel=0.1)
 
+    @pytest.mark.skipif("__cantera_avbp_version__" in vars(ct),
+                        reason="Soret with mixture average is possible in Cantera-avbp version")
     def test_soret_with_mix(self):
         # Test that enabling Soret diffusion without
         # multicomponent transport results in an error
