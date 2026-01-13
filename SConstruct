@@ -204,6 +204,7 @@ if "sdist" in COMMAND_LINE_TARGETS:
             py_requires_ver_str,
             cantera_version,
             cantera_short_version,
+            cantera_avbp_version,
         ],
         check=True,
     )

@@ -56,7 +56,7 @@ jobs:
       incoming-sha: ${{ steps.get-incoming-sha.outputs.incoming-sha }}
       tag-ref: ${{ steps.munge-incoming-ref.outputs.tag-ref }}
     steps:
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.10'
       - name: Munge the incoming ref
@@ -121,14 +121,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libboost-dev
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         name: Checkout the repository
         with:
           repository: "cerfacs/cantera-avbp"
           submodules: recursive
           ref: ${{ github.event.inputs.incoming_ref }}
       - name: Set Up Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install dependencies
@@ -141,7 +141,7 @@ jobs:
         env:
           CYTHON_FORCE_REGEN: "1"
       - name: Archive the built sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ./build/python_sdist/dist/*.tar.gz
           name: cibw-sdist
@@ -172,14 +172,14 @@ jobs:
     outputs:
       job-status: ${{ job.status }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         name: Checkout the repository
         with:
           repository: "cerfacs/cantera-avbp"
           # submodules: recursive
           ref: ${{ github.event.inputs.incoming_ref }}
       - name: Archive the *.sh scripts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: |
             .github/build_dependencies.sh
@@ -205,7 +205,7 @@ jobs:
       BOOST_URL: https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.7z
     steps:
       - name: Download pre-built sdist
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: cibw-sdist
       - name: Extract the sdist tarball
@@ -238,7 +238,7 @@ jobs:
             curl -sL -H "Authorization: token $GH_TARBALL_DL" -o ${{ runner.temp }}/cantera.tar.gz $REPO_API_URL \
             && tar -xzf ${{ runner.temp }}/cantera.tar.gz --strip-components=1 -C ${{ runner.temp }} "joebarteam11-cantera-avbp-3.0.0-${{ needs.post-pending-status.outputs.incoming-sha }}/test"
       - name: Archive the built wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           path: ./wheelhouse/*.whl
           name: cibw-wheels-windows-${{ strategy.job-index }}
@@ -261,18 +261,18 @@ jobs:
             boost-arch: aarch64
             boost-toolset: clang
             boost-platform-version: "14"
-            boost-version: "1.86.0"
+            boost-version: "1.88.0"
             arch: "arm64"
       fail-fast: true # Si plusieurs configs dans la matrice et fail-fast = False permet de continuer le workflow pour les autre config.
 
     steps:
       - name: Download shell scripts required to set-up environments and install libraries
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: sh-scripts
 
       - name: Download pre-built sdist
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: cibw-sdist
 
@@ -287,8 +287,12 @@ jobs:
           echo "test-root=${RUNNER_TEMP}/ct-test-dir" >> $GITHUB_OUTPUT
         shell: bash
 
+      - name: Install uv
+        if: runner.os != 'Linux'
+        uses: astral-sh/setup-uv@1e862dfacbd1d6d858c55d9b792c756523627244 # v7.1.4
+
       - name: Install boost
-        uses: MarkusJx/install-boost@b1f0ee8b87cf60236b72440c72d0085d002770c5 # v2.5.0
+        uses: MarkusJx/install-boost@8ba8b2fac59ef3d91a838bb4aa53ceabd33d1aa3 # v2.5.1
         id: install-boost
         with:
           # REQUIRED: Specify the required boost version
@@ -337,22 +341,22 @@ jobs:
       #     key: ${{ steps.restore-built-libraries.outputs.cache-primary-key }}
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # 3.1.4
+        uses: pypa/cibuildwheel@63fd63b352a9a8bdcc24791c9dbee952ee9a8abc # 3.3.0
         env:
           CC: clang
           CXX: clang++
           SDKROOT: /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk
           CANTERA_TEST_DIR: ${{ steps.download-test-files.outputs.test-root }}
           CIBW_ENVIRONMENT_MACOS: CT_SKIP_SLOW=1
-          CIBW_BEFORE_BUILD: |
-            python -m pip install --upgrade pip
-            python -m pip install Cython==3.1.1 numpy>=2.0
+          # CIBW_BEFORE_BUILD: |
+          #   python -m pip install --upgrade pip
+          #   python -m pip install Cython==3.1.1 numpy>=2.0
           CIBW_BUILD: "cp39-macosx_arm64" #"cp*-*"
           CIBW_ARCHS: ${{ matrix.arch }}    
           CIBW_TEST_SKIP: "*" # Enable to deactivate the automatic pytest after building the wheel
 
       - name: Archive the built wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ./wheelhouse/*.whl
           name: cibw-wheels-${{ runner.os }}-${{ strategy.job-index }}
@@ -376,7 +380,7 @@ jobs:
 
     steps:
       - name: Download pre-built sdist
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: cibw-sdist
 
@@ -392,7 +396,7 @@ jobs:
         shell: bash
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@c923d83ad9c1bc00211c5041d0c3f73294ff88f6 # 3.1.4
+        uses: pypa/cibuildwheel@63fd63b352a9a8bdcc24791c9dbee952ee9a8abc # 3.3.0
         env:
           CIBW_ENVIRONMENT_LINUX: CT_SKIP_SLOW=1 CANTERA_TEST_DIR=/host${{ steps.download-test-files.outputs.test-root }}
           CIBW_BEFORE_BUILD: |
@@ -402,7 +406,7 @@ jobs:
           CIBW_TEST_SKIP: "*" # Enable to deactivate the automatic pytest after building the wheel
 
       - name: Archive the built wheels
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: ./wheelhouse/*.whl
           name: cibw-wheels-${{ runner.os }}-${{ strategy.job-index }}
