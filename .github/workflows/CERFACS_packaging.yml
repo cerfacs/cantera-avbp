@@ -351,7 +351,7 @@ jobs:
           # CIBW_BEFORE_BUILD: |
           #   python -m pip install --upgrade pip
           #   python -m pip install Cython==3.1.1 numpy>=2.0
-          CIBW_BUILD: "cp39-macosx_arm64" #"cp*-*"
+          CIBW_BUILD: "cp313-macosx_arm64" #"cp39-macosx_arm64" #"cp*-*"
           CIBW_ARCHS: ${{ matrix.arch }}    
           CIBW_TEST_SKIP: "*" # Enable to deactivate the automatic pytest after building the wheel
 
